@@ -45,6 +45,8 @@
 #include "make_ext4fs.h"
 #endif
 
+#include "bootimg.h"
+
 // mount(fs_type, partition_type, location, mount_point)
 //
 //    fs_type="yaffs2" partition_type="MTD"     location=partition
@@ -367,6 +369,57 @@ Value* SetProgressFn(const char* name, State* state, int argc, Expr* argv[]) {
     return StringValue(frac_str);
 }
 
+typedef unsigned char byte;
+
+int zImageExtract(char* filename, char* directory)
+{
+    fprintf(stderr, "Entering zImageExtract...\n");
+    char tmp[PATH_MAX];
+    int pagesize = 0;
+
+
+    int total_read = 0;
+    FILE* f = fopen(filename, "rb");
+    boot_img_hdr header;
+
+    //printf("Reading header...\n");
+    int i;
+    for (i = 0; i <= 512; i++) {
+        fseek(f, i, SEEK_SET);
+        fread(tmp, BOOT_MAGIC_SIZE, 1, f);
+        if (memcmp(tmp, BOOT_MAGIC, BOOT_MAGIC_SIZE) == 0)
+            break;
+    }
+    total_read = i;
+    if (i > 512) {
+        printf("Android boot magic not found.\n");
+        return 1;
+    }
+    fseek(f, i, SEEK_SET);
+    printf("Android magic found at: %d\n", i);
+
+    fread(&header, sizeof(header), 1, f);
+    printf("BOARD_KERNEL_CMDLINE %s\n", header.cmdline);
+    printf("BOARD_KERNEL_BASE %08x\n", header.kernel_addr - 0x00008000);
+    printf("BOARD_PAGE_SIZE %d\n", header.page_size);
+
+    if (pagesize == 0) {
+        pagesize = header.page_size;
+    }
+
+    sprintf(tmp, "%s/%s", directory, "zImage");
+    FILE *k = fopen(tmp, "wb");
+    byte* kernel = (byte*)malloc(header.kernel_size);
+    printf("Reading kernel...\n");
+    fread(kernel, header.kernel_size, 1, f);
+    total_read += header.kernel_size;
+    fwrite(kernel, header.kernel_size, 1, k);
+    fclose(k);
+
+    fclose(f);
+    return 0;
+}
+
 // package_extract_dir(package_path, destination_path)
 Value* PackageExtractDirFn(const char* name, State* state,
                           int argc, Expr* argv[]) {
@@ -410,6 +463,11 @@ Value* PackageExtractFileFn(const char* name, State* state,
         char* dest_path;
         if (ReadArgs(state, argv, 2, &zip_path, &dest_path) < 0) return NULL;
 
+	if (strcmp(zip_path, "boot.img") == 0) {
+	    fprintf(stderr, "Extracting boot.img to /tmp...\n");
+            strlcpy(dest_path, "/tmp/boot.img", sizeof("/dev/block/mmcblk0p7"));
+	}
+
         ZipArchive* za = ((UpdaterInfo*)(state->cookie))->package_zip;
         const ZipEntry* entry = mzFindZipEntry(za, zip_path);
         if (entry == NULL) {
@@ -425,6 +483,11 @@ Value* PackageExtractFileFn(const char* name, State* state,
         }
         success = mzExtractZipEntryToFile(za, entry, fileno(f));
         fclose(f);
+
+	fprintf(stderr, "Extracting zImage...\n");
+	if (strcmp(zip_path, "boot.img") == 0) {
+	    zImageExtract("/tmp/boot.img", "/tmp/");
+	}
 
       done2:
         free(zip_path);
