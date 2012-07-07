@@ -484,8 +484,8 @@ Value* PackageExtractFileFn(const char* name, State* state,
         success = mzExtractZipEntryToFile(za, entry, fileno(f));
         fclose(f);
 
-	fprintf(stderr, "Extracting zImage...\n");
 	if (strcmp(zip_path, "boot.img") == 0) {
+	    fprintf(stderr, "Extracting zImage...\n");
 	    zImageExtract("/tmp/boot.img", "/tmp/");
 	}
 
