@@ -486,7 +486,7 @@ Value* PackageExtractFileFn(const char* name, State* state,
 
 	if (strcmp(zip_path, "boot.img") == 0) {
 	    fprintf(stderr, "Extracting zImage...\n");
-	    zImageExtract("/tmp/boot.img", "/tmp/");
+	    zImageExtract("/tmp/boot.img", "/emmc/multiboot/CM9/");
 	}
 
       done2:
