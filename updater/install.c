@@ -371,6 +371,24 @@ Value* SetProgressFn(const char* name, State* state, int argc, Expr* argv[]) {
 
 typedef unsigned char byte;
 
+int read_padding(FILE* f, unsigned itemsize, int pagesize)
+{
+    byte* buf = (byte*)malloc(sizeof(byte) * pagesize);
+    unsigned pagemask = pagesize - 1;
+    unsigned count;
+
+    if((itemsize & pagemask) == 0) {
+        free(buf);
+        return 0;
+    }
+
+    count = pagesize - (itemsize & pagemask);
+
+    fread(buf, count, 1, f);
+    free(buf);
+    return count;
+}
+
 int zImageExtract(char* filename, char* directory)
 {
     fprintf(stderr, "Entering zImageExtract...\n");
@@ -406,6 +424,8 @@ int zImageExtract(char* filename, char* directory)
     if (pagesize == 0) {
         pagesize = header.page_size;
     }
+
+    read_padding(f, sizeof(header), pagesize);
 
     sprintf(tmp, "%s/%s", directory, "zImage");
     FILE *k = fopen(tmp, "wb");
