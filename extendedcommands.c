@@ -1255,15 +1255,15 @@ void show_advanced_menu()
     };
 
     static char* list[] = { "reboot recovery",
-                            "wipe dalvik cache",
-                            "wipe battery stats",
+                            //"wipe dalvik cache",
+                            //"wipe battery stats",
                             "report error",
                             "key test",
                             "show log",
-                            "fix permissions",
-                            "partition sdcard",
-                            "partition external sdcard",
-                            "partition internal sdcard",
+                            //"fix permissions",
+                            //"partition sdcard",
+                            //"partition external sdcard",
+                            //"partition internal sdcard",
                             NULL
     };
 
@@ -1287,7 +1287,7 @@ void show_advanced_menu()
             case 0:
                 android_reboot(ANDROID_RB_RESTART2, 0, "recovery");
                 break;
-            case 1:
+/*            case 1:
                 if (0 != ensure_path_mounted("/data"))
                     break;
                 ensure_path_mounted("/sd-ext");
@@ -1304,10 +1304,11 @@ void show_advanced_menu()
                 if (confirm_selection( "Confirm wipe?", "Yes - Wipe Battery Stats"))
                     wipe_battery_stats();
                 break;
-            case 3:
+            */
+            case 1:
                 handle_failure(1);
                 break;
-            case 4:
+            case 2:
             {
                 ui_print("Outputting key codes.\n");
                 ui_print("Go back to end debugging.\n");
@@ -1322,10 +1323,10 @@ void show_advanced_menu()
                 while (action != GO_BACK);
                 break;
             }
-            case 5:
+            case 3:
                 ui_printlogtail(12);
                 break;
-            case 6:
+/*            case 6:
                 ensure_path_mounted("/system");
                 ensure_path_mounted("/data");
                 ui_print("Fixing permissions...\n");
@@ -1341,6 +1342,7 @@ void show_advanced_menu()
             case 9:
                 partition_sdcard("/emmc");
                 break;
+            */
         }
     }
 }
