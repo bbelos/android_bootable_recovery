@@ -60,6 +60,14 @@ Value* MountFn(const char* name, State* state, int argc, Expr* argv[]) {
         return NULL;
     }
 
+    if (strcmp(location, "/dev/block/mmcblk0p14") == 0) {
+       strlcpy(location, "/dev/block/loop2", sizeof("/dev/block/mmcblk0p14"));
+    } else if (strcmp(location, "/dev/block/mmcblk0p15") == 0) {
+       strlcpy(location, "/dev/block/loop3", sizeof("/dev/block/mmcblk0p15"));
+    } else if (strcmp(location, "/dev/block/mmcblk0p17") == 0) {
+       strlcpy(location, "/dev/block/loop4", sizeof("/dev/block/mmcblk0p17"));
+    }
+
     if (strlen(fs_type) == 0) {
         ErrorAbort(state, "fs_type argument to %s() can't be empty", name);
         goto done;
@@ -212,6 +220,14 @@ Value* FormatFn(const char* name, State* state, int argc, Expr* argv[]) {
 
     if (ReadArgs(state, argv, 5, &fs_type, &partition_type, &location, &fs_size, &mount_point) < 0) {
         return NULL;
+    }
+
+    if (strcmp(location, "/dev/block/mmcblk0p14") == 0) {
+       strlcpy(location, "/dev/block/loop2", sizeof("/dev/block/mmcblk0p14"));
+    } else if (strcmp(location, "/dev/block/mmcblk0p15") == 0) {
+       strlcpy(location, "/dev/block/loop3", sizeof("/dev/block/mmcblk0p15"));
+    } else if (strcmp(location, "/dev/block/mmcblk0p17") == 0) {
+       strlcpy(location, "/dev/block/loop4", sizeof("/dev/block/mmcblk0p17"));
     }
 
     if (strlen(fs_type) == 0) {
