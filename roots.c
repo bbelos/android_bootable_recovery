@@ -197,8 +197,8 @@ void setup_data_media() {
         }
     }
     rmdir(mount_point);
-    mkdir("/data/media", 0755);
-    symlink("/data/media", mount_point);
+    mkdir("/internalmmc/media", 0755);
+    symlink("/internalmmc/media", mount_point);
 }
 
 int is_data_media_volume_path(const char* path) {
@@ -220,10 +220,10 @@ int ensure_path_mounted(const char* path) {
 int ensure_path_mounted_at_mount_point(const char* path, const char* mount_point) {
     if (is_data_media_volume_path(path)) {
         if (ui_should_log_stdout()) {
-            LOGI("using /data/media for %s.\n", path);
+            LOGI("using /internalmmc/media for %s.\n", path);
         }
         int ret;
-        if (0 != (ret = ensure_path_mounted("/data")))
+        if (0 != (ret = ensure_path_mounted("/internalmmc")))
             return ret;
         setup_data_media();
         return 0;
